@@ -779,7 +779,16 @@ const extractResponseErrorIfItNeeded = (routeInfo, responseBodyInfo, routeParams
       classNameCase(`${routeName.usage} BadResponse`),
     ]);
 
-    const errorSchemas = responseBodyInfo.error.schemas.map(getSchemaFromRequestType).filter(Boolean);
+    const errorSchemas = responseBodyInfo.error.schemas.map((response) => ({
+      type: 'object',
+      properties: {
+        status: {
+          type: response.status
+        },
+        error: getSchemaFromRequestType(response),
+      },
+      required: ['status', 'error']
+    })).filter(schema => Boolean(schema.properties.error));
 
     if (!errorSchemas.length) return;
 
